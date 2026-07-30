@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useIntegration } from '@/hooks/use-integration'
 import { useLanguage } from '@/hooks/use-language'
+import { useOrganization } from '@/hooks/use-organization'
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import {
@@ -13,11 +14,15 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { Loader2, MessageCircle, Plug, Unplug, CheckCircle2 } from 'lucide-react'
+import { Loader2, MessageCircle, Plug, Unplug, CheckCircle2, Copy, Webhook } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export default function Settings() {
   const { integration, setIntegration, loading: integrationLoading } = useIntegration()
   const { t } = useLanguage()
+  const { organization, organizationId } = useOrganization()
+  const [organizationName, setOrganizationName] = useState('')
 
   const [qrCode, setQrCode] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
@@ -27,6 +32,13 @@ export default function Settings() {
       setQrCode(null)
     }
   }, [integration?.status])
+  useEffect(() => { setOrganizationName(organization?.name || '') }, [organization?.name])
+
+  const saveOrganization = async () => {
+    if (!organizationId) return
+    const { error } = await (supabase as any).from('organizations').update({ name: organizationName }).eq('id', organizationId)
+    if (error) toast.error(error.message); else toast.success('Configurações salvas')
+  }
 
   const handleConnect = async () => {
     if (!integration) return
@@ -233,6 +245,20 @@ export default function Settings() {
               )}
             </div>
           </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Configurações gerais</CardTitle><CardDescription>Dados e preferências da organização.</CardDescription></CardHeader>
+          <CardContent className="space-y-4"><div className="space-y-2"><Label>Nome da organização</Label><Input value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} /></div><Button onClick={saveOrganization}>Salvar</Button></CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Webhook className="h-5 w-5" />Integrações n8n e webhooks</CardTitle><CardDescription>Use os endpoints abaixo com o secret configurado no servidor. Nenhuma credencial é exibida no frontend.</CardDescription></CardHeader>
+          <CardContent className="space-y-2">{[
+            ['/functions/v1/evolution-webhook', 'Webhook de entrada Evolution'],
+            ['/functions/v1/process-scheduled-messages', 'Processar mensagens agendadas'],
+            ['/functions/v1/openai-agent-response', 'Executar agente OpenAI'],
+          ].map(([path, label]) => { const url = `${import.meta.env.VITE_SUPABASE_URL}${path}`; return <div key={path} className="flex items-center justify-between gap-3 rounded-lg border p-3"><div className="min-w-0"><p className="text-sm font-medium">{label}</p><code className="block truncate text-xs text-muted-foreground">{url}</code></div><Button variant="ghost" size="icon" onClick={() => { navigator.clipboard.writeText(url); toast.success('Copiado') }}><Copy className="h-4 w-4" /></Button></div> })}</CardContent>
         </Card>
       </div>
     </div>
