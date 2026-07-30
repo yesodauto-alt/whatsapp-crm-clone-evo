@@ -1,251 +1,57 @@
-import { useState } from 'react'
-import { useLanguage } from '@/hooks/use-language'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { FormEvent, useState } from 'react'
+import { Crown, Loader2, MailPlus, Plus, Trash2, UserPlus, Users } from 'lucide-react'
+import { useTeams } from '@/hooks/use-teams'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog'
-import { Plus, Users, Crown, Trash2, MessageSquare } from 'lucide-react'
-
-type Role = 'super-admin' | 'admin' | 'leader' | 'agent'
-
-interface TeamMember {
-  id: string
-  name: string
-  email: string
-  role: Role
-}
-
-interface Team {
-  id: string
-  name: string
-  description: string
-  members: TeamMember[]
-  conversations: number
-}
-
-const roleConfig: Record<Role, { label: string; color: string; icon: typeof Crown }> = {
-  'super-admin': { label: 'Super Admin', color: 'bg-purple-500 text-white', icon: Crown },
-  admin: { label: 'Admin', color: 'bg-blue-500 text-white', icon: Crown },
-  leader: { label: 'Leader', color: 'bg-green-500 text-white', icon: Users },
-  agent: { label: 'Agent', color: 'bg-gray-500 text-white', icon: Users },
-}
-
-const mockTeams: Team[] = [
-  {
-    id: '1',
-    name: 'Sales Team Alpha',
-    description: 'Primary sales team handling new leads and conversions.',
-    conversations: 42,
-    members: [
-      { id: 'm1', name: 'Yesod Admin', email: 'yesod.auto@gmail.com', role: 'super-admin' },
-      { id: 'm2', name: 'John Seller', email: 'john@yesod.auto', role: 'leader' },
-      { id: 'm3', name: 'Jane Agent', email: 'jane@yesod.auto', role: 'agent' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Support Team',
-    description: 'Customer support and retention specialists.',
-    conversations: 28,
-    members: [
-      { id: 'm4', name: 'Carlos Manager', email: 'carlos@yesod.auto', role: 'admin' },
-      { id: 'm5', name: 'Ana Support', email: 'ana@yesod.auto', role: 'agent' },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Closing Team',
-    description: 'Senior agents focused on closing high-value deals.',
-    conversations: 15,
-    members: [
-      { id: 'm6', name: 'Maria Closer', email: 'maria@yesod.auto', role: 'leader' },
-      { id: 'm7', name: 'Pedro Agent', email: 'pedro@yesod.auto', role: 'agent' },
-    ],
-  },
-]
+import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'sonner'
 
 export default function Teams() {
-  const { t } = useLanguage()
-  const [teams, setTeams] = useState<Team[]>(mockTeams)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [formData, setFormData] = useState({ name: '', description: '' })
+  const { teams, loading, canConfigure, createTeam, addExistingMember, createInvite, removeMember } = useTeams()
+  const [createOpen, setCreateOpen] = useState(false)
+  const [memberOpen, setMemberOpen] = useState(false)
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null)
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [email, setEmail] = useState('')
+  const [leader, setLeader] = useState(false)
+  const [invite, setInvite] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const newTeam: Team = {
-      id: crypto.randomUUID(),
-      name: formData.name,
-      description: formData.description,
-      members: [],
-      conversations: 0,
-    }
-    setTeams((prev) => [...prev, newTeam])
-    setFormData({ name: '', description: '' })
-    setIsDialogOpen(false)
+  const submitTeam = async (event: FormEvent) => {
+    event.preventDefault(); setSaving(true)
+    try { await createTeam({ name, description, color: '#6366f1' }); setCreateOpen(false); setName(''); setDescription('') }
+    catch (error: any) { toast.error(error.message) } finally { setSaving(false) }
   }
-
-  const handleDelete = (id: string) => {
-    setTeams((prev) => prev.filter((team) => team.id !== id))
+  const submitMember = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!selectedTeam) return
+    setSaving(true)
+    try {
+      if (invite) await createInvite({ teamId: selectedTeam, email, role: leader ? 'team_lead' : 'agent' })
+      else await addExistingMember(selectedTeam, email, leader)
+      setMemberOpen(false); setEmail(''); setLeader(false); setInvite(false)
+    } catch (error: any) { toast.error(error.message) } finally { setSaving(false) }
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 p-6 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-apple min-h-full bg-background">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <h2 className="text-4xl font-bold tracking-tight text-foreground">
-            {t('teams_title') || 'Teams'}
-          </h2>
-          <p className="text-muted-foreground mt-2 font-medium text-base">
-            {t('teams_desc') || 'Manage teams and conversation assignments'}
-          </p>
-        </div>
-        <Button
-          onClick={() => setIsDialogOpen(true)}
-          className="rounded-full shadow-subtle px-6 h-12 font-semibold"
-        >
-          <Plus className="mr-2 h-5 w-5" />
-          {t('add_team') || 'Add Team'}
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4"><div><h1 className="text-2xl font-bold tracking-tight">Equipes</h1><p className="mt-1 text-sm text-muted-foreground">Gerencie usuários, líderes e a atribuição das conversas.</p></div>{canConfigure && <Button onClick={() => setCreateOpen(true)}><Plus className="mr-2 h-4 w-4" />Nova equipe</Button>}</div>
+      {loading ? <Loader2 className="mx-auto h-7 w-7 animate-spin" /> : <div className="grid gap-4 md:grid-cols-2">{teams.map((team) => (
+        <Card key={team.id}>
+          <CardHeader><div className="flex items-start justify-between"><div className="flex gap-3"><div className="rounded-lg p-2 text-white" style={{ background: team.color }}><Users className="h-5 w-5" /></div><div><CardTitle className="text-lg">{team.name}</CardTitle><CardDescription>{team.description || 'Sem descrição'} · {team.members.length} membro(s)</CardDescription></div></div>{canConfigure && <Button variant="outline" size="sm" onClick={() => { setSelectedTeam(team.id); setMemberOpen(true) }}><UserPlus className="mr-2 h-4 w-4" />Adicionar</Button>}</div></CardHeader>
+          <CardContent className="space-y-2">{team.members.map((member) => <div key={member.id} className="flex items-center justify-between rounded-lg border p-3"><div className="flex items-center gap-3"><Avatar className="h-9 w-9"><AvatarFallback>{(member.full_name || member.email || 'U')[0].toUpperCase()}</AvatarFallback></Avatar><div><p className="text-sm font-semibold">{member.full_name || 'Usuário'}</p><p className="text-xs text-muted-foreground">{member.email}</p></div></div><div className="flex items-center gap-2">{member.is_leader && <Badge><Crown className="mr-1 h-3 w-3" />Líder</Badge>}{canConfigure && <Button size="icon" variant="ghost" onClick={() => removeMember(member.id).catch((e) => toast.error(e.message))}><Trash2 className="h-4 w-4 text-destructive" /></Button>}</div></div>)}{team.members.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhum membro vinculado.</p>}</CardContent>
+        </Card>
+      ))}</div>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {teams.map((team) => (
-          <Card
-            key={team.id}
-            className="shadow-subtle border border-border/40 rounded-[2rem] overflow-hidden flex flex-col transition-all duration-300 hover:shadow-elevation"
-          >
-            <CardHeader className="pb-4">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted p-3 rounded-full">
-                    <Users className="h-5 w-5 text-foreground" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg tracking-tight">{team.name}</CardTitle>
-                    <CardDescription className="text-xs font-semibold mt-0.5">
-                      {team.members.length} {t('members') || 'members'} · {team.conversations}{' '}
-                      {t('conversations') || 'conversations'}
-                    </CardDescription>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-full text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDelete(team.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1 pb-6">
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                {team.description}
-              </p>
-              <div className="space-y-2">
-                {team.members.map((member) => {
-                  const role = roleConfig[member.role]
-                  const RoleIcon = role.icon
-                  return (
-                    <div
-                      key={member.id}
-                      className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-2xl hover:bg-muted transition-all duration-300"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9 border border-border">
-                          <AvatarFallback className="bg-muted text-foreground font-semibold text-xs">
-                            {member.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-bold text-sm text-foreground">{member.name}</p>
-                          <p className="text-xs text-muted-foreground font-medium">
-                            {member.email}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge
-                        className={`text-[10px] px-2 py-0.5 font-bold rounded-md ${role.color}`}
-                      >
-                        <RoleIcon className="h-3 w-3 mr-1" />
-                        {role.label}
-                      </Badge>
-                    </div>
-                  )
-                })}
-                {team.members.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-4 font-medium">
-                    {t('no_members') || 'No members yet'}
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}><DialogContent><form onSubmit={submitTeam}><DialogHeader><DialogTitle>Nova equipe</DialogTitle></DialogHeader><div className="space-y-4 py-5"><div className="space-y-2"><Label>Nome</Label><Input required value={name} onChange={(e) => setName(e.target.value)} /></div><div className="space-y-2"><Label>Descrição</Label><Input value={description} onChange={(e) => setDescription(e.target.value)} /></div></div><DialogFooter><Button disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Criar</Button></DialogFooter></form></DialogContent></Dialog>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[450px] rounded-[2rem] p-0 overflow-hidden border-border/60">
-          <form onSubmit={handleSubmit}>
-            <DialogHeader className="p-6 md:p-8 pb-4 border-b border-border/40 bg-muted/20">
-              <DialogTitle className="text-2xl">{t('add_team') || 'Add Team'}</DialogTitle>
-              <DialogDescription>
-                {t('team_dialog_desc') || 'Create a new team for conversation assignment.'}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="p-6 md:p-8 space-y-6">
-              <div className="space-y-3">
-                <Label htmlFor="team_name" className="font-semibold">
-                  {t('team_name') || 'Team Name'}
-                </Label>
-                <Input
-                  id="team_name"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Sales Team Alpha"
-                  className="rounded-xl h-12"
-                />
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="team_desc" className="font-semibold">
-                  {t('description') || 'Description'}
-                </Label>
-                <Input
-                  id="team_desc"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Primary sales team"
-                  className="rounded-xl h-12"
-                />
-              </div>
-            </div>
-            <DialogFooter className="p-6 md:p-8 pt-4 border-t border-border/40 bg-muted/20">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setIsDialogOpen(false)}
-                className="rounded-full"
-              >
-                {t('cancel') || 'Cancel'}
-              </Button>
-              <Button type="submit" className="rounded-full px-8 shadow-subtle">
-                {t('create_team') || 'Create Team'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <Dialog open={memberOpen} onOpenChange={setMemberOpen}><DialogContent><form onSubmit={submitMember}><DialogHeader><DialogTitle>Adicionar usuário à equipe</DialogTitle></DialogHeader><div className="space-y-4 py-5"><div className="space-y-2"><Label>E-mail do usuário</Label><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div><label className="flex items-center gap-2 text-sm"><Checkbox checked={leader} onCheckedChange={(value) => setLeader(!!value)} />Líder do time</label><label className="flex items-center gap-2 text-sm"><Checkbox checked={invite} onCheckedChange={(value) => setInvite(!!value)} /><MailPlus className="h-4 w-4" />Enviar convite caso ainda não esteja cadastrado</label></div><DialogFooter><Button disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Vincular usuário</Button></DialogFooter></form></DialogContent></Dialog>
     </div>
   )
 }

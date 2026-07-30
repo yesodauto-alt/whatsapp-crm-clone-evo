@@ -28,7 +28,9 @@ export function Sidebar() {
   const navItems = [
     { name: 'Dashboard', path: '/app', icon: LayoutDashboard, roles: ['super_admin', 'admin'] },
     { name: 'Prioridades', path: '/app/priorities', icon: Flame },
+    { name: 'Fila SDR', path: '/app/queue', icon: Flame },
     { name: 'Conversas', path: '/app/conversations', icon: MessageSquare },
+    { name: 'Leads', path: '/app/leads', icon: Users },
     { name: 'Contatos', path: '/app/contacts', icon: Contact },
     { name: 'Canais', path: '/app/channels', icon: Radio, roles: ['super_admin', 'admin'] },
     { name: t('pipeline_nav') || 'Pipeline', path: '/app/pipeline', icon: Columns },

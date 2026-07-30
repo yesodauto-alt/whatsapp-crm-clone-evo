@@ -216,7 +216,7 @@ export default function Dashboard() {
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        <Card>
+        <Card className="cursor-pointer transition-colors hover:bg-muted/30" onClick={() => navigate('/app/contacts')}>
           <CardContent className="p-6 md:p-8 flex flex-col justify-between h-full">
             <div className="flex items-center justify-between mb-6">
               <span className="text-sm font-semibold text-muted-foreground tracking-tight uppercase">
@@ -231,7 +231,7 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="cursor-pointer transition-colors hover:bg-muted/30" onClick={() => navigate('/app/priorities')}>
           <CardContent className="p-6 md:p-8 flex flex-col justify-between h-full">
             <div className="flex items-center justify-between mb-6">
               <span className="text-sm font-semibold text-muted-foreground tracking-tight uppercase">
@@ -246,7 +246,7 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="cursor-pointer transition-colors hover:bg-muted/30" onClick={() => navigate('/app/queue')}>
           <CardContent className="p-6 md:p-8 flex flex-col justify-between h-full">
             <div className="flex items-center justify-between mb-6">
               <span className="text-sm font-semibold text-muted-foreground tracking-tight uppercase">
@@ -261,7 +261,7 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="cursor-pointer transition-colors hover:bg-muted/30" onClick={() => navigate('/app/conversations')}>
           <CardContent className="p-6 md:p-8 flex flex-col justify-between h-full">
             <div className="flex items-center justify-between mb-6">
               <span className="text-sm font-semibold text-muted-foreground tracking-tight uppercase">
@@ -305,7 +305,7 @@ export default function Dashboard() {
               icon: Package,
             },
           ].map((metric) => (
-            <Card key={metric.label}>
+            <Card key={metric.label} className="cursor-pointer transition-colors hover:bg-muted/30" onClick={() => navigate(metric.label === 'Produtos ativos' ? '/app/products' : '/app/pipeline')}>
               <CardContent className="p-6">
                 <div className="mb-5 flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">

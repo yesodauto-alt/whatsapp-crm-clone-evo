@@ -15,7 +15,6 @@ export const useContacts = (searchQuery: string = '') => {
       let query = supabase
         .from('whatsapp_contacts')
         .select('*')
-        .eq('user_id', user.id)
         .order('score', { ascending: false, nullsFirst: false })
         .order('last_message_at', { ascending: false, nullsFirst: false })
 
@@ -40,7 +39,6 @@ export const useContacts = (searchQuery: string = '') => {
           event: '*',
           schema: 'public',
           table: 'whatsapp_contacts',
-          filter: `user_id=eq.${user.id}`,
         },
         () => {
           fetchContacts()
