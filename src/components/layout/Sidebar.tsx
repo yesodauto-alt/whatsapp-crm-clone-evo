@@ -43,7 +43,7 @@ export function Sidebar() {
     { name: 'Oportunidades', path: '/app/opportunities', icon: Columns },
     { name: 'Automações', path: '/app/automations', icon: Workflow, roles: ['super_admin', 'admin'] },
     { name: 'Templates', path: '/app/templates', icon: FileText },
-    { name: 'Configurações', path: '/settings', icon: SettingsIcon, roles: ['super_admin'] },
+    { name: 'Configurações', path: '/settings', icon: SettingsIcon, roles: ['super_admin', 'admin'] },
     { name: 'Perfil', path: '/app/profile', icon: User },
   ].filter((item) => !item.roles || (role && item.roles.includes(role)))
 

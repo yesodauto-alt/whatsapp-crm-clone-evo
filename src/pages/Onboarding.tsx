@@ -47,7 +47,7 @@ export default function Onboarding() {
             setIntegration((prev: any) => (prev ? { ...prev, status: 'CONNECTED' } : null))
             setStep(2)
           }
-        } catch (e) {
+        } catch {
           // Silent catch to prevent console spam
         }
       }
@@ -119,7 +119,7 @@ export default function Onboarding() {
             }
           }
         }
-      } catch (err) {
+      } catch {
         // Fallback optimistic update to ensure we don't trap the user
         setIntegration((prev: any) => (prev ? { ...prev, is_setup_completed: true } : null))
       } finally {
