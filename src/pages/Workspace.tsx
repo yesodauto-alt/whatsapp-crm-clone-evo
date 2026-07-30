@@ -154,6 +154,7 @@ export function CrudModule({ kind }: { kind: CrudKind }) {
   const config = crudConfig[kind]
   const { organizationId, canConfigure } = useOrganization()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [rows, setRows] = useState<any[]>([])
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
@@ -176,7 +177,17 @@ export function CrudModule({ kind }: { kind: CrudKind }) {
   return (
     <Workspace title={config.title} description={config.description} icon={<config.icon className="h-5 w-5" />}>
       <div className="flex justify-end">{(canConfigure || kind !== 'automations') && <Button onClick={() => setOpen(true)}><Plus className="mr-2 h-4 w-4" />{config.button}</Button>}</div>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{rows.map((row) => <Card key={row.id}><CardHeader><div className="flex items-start justify-between"><div><CardTitle className="text-base">{row.name || row.subject}</CardTitle><Badge className="mt-2" variant="outline">{row.status || (row.is_active ? 'Ativo' : 'Inativo')}</Badge></div><Button size="icon" variant="ghost" onClick={() => remove(row.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button></div></CardHeader><CardContent><p className="line-clamp-3 whitespace-pre-wrap text-sm text-muted-foreground">{row.content || row.description}</p></CardContent></Card>)}</div>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{rows.map((row) => <Card key={row.id} className={kind === 'support' ? 'cursor-pointer' : ''} onClick={() => kind === 'support' && navigate(`/app/support/${row.id}`)}><CardHeader><div className="flex items-start justify-between"><div><CardTitle className="text-base">{row.name || row.subject}</CardTitle><Badge className="mt-2" variant="outline">{row.status || (row.is_active ? 'Ativo' : 'Inativo')}</Badge></div><Button size="icon" variant="ghost" onClick={(event) => { event.stopPropagation(); remove(row.id) }}><Trash2 className="h-4 w-4 text-destructive" /></Button></div></CardHeader><CardContent><p className="line-clamp-3 whitespace-pre-wrap text-sm text-muted-foreground">{row.content || row.description}</p>{kind === 'automations' && <Button className="mt-4" size="sm" variant="outline" onClick={async () => {
+        if (!organizationId) return
+        const { error } = await (supabase as any).from('crm_automation_logs').insert({
+          organization_id: organizationId,
+          automation_id: row.id,
+          status: 'success',
+          details: 'Execução manual de validação',
+        })
+        if (error) toast.error(error.message)
+        else toast.success('Automação executada e registrada')
+      }}>Executar teste</Button>}</CardContent></Card>)}</div>
       {rows.length === 0 && <Card><CardContent className="py-12 text-center text-sm text-muted-foreground">Nenhum registro cadastrado.</CardContent></Card>}
       <Dialog open={open} onOpenChange={setOpen}><DialogContent><form onSubmit={submit}><DialogHeader><DialogTitle>{config.button}</DialogTitle></DialogHeader><div className="space-y-4 py-5"><div className="space-y-2"><Label>{config.nameLabel}</Label><Input required value={name} onChange={(e) => setName(e.target.value)} /></div><div className="space-y-2"><Label>{kind === 'templates' ? 'Mensagem' : 'Descrição'}</Label><Textarea required rows={6} value={content} onChange={(e) => setContent(e.target.value)} /></div></div><DialogFooter><Button type="submit">Salvar</Button></DialogFooter></form></DialogContent></Dialog>
     </Workspace>

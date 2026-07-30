@@ -20,7 +20,7 @@ import Teams from './pages/Teams'
 import NotFound from './pages/NotFound'
 import Onboarding from './pages/Onboarding'
 import { Channels, CrudModule, Leads, Priorities, Profile, Queue } from './pages/Workspace'
-import { KnowledgeBase, LeadDetail, Opportunities } from './pages/CRMDetails'
+import { KnowledgeBase, LeadDetail, Opportunities, SupportDetail } from './pages/CRMDetails'
 
 const App = () => (
   <LanguageProvider>
@@ -53,6 +53,7 @@ const App = () => (
                 <Route path="products" element={<Products />} />
                 <Route path="teams" element={<Teams />} />
                 <Route path="support" element={<CrudModule kind="support" />} />
+                <Route path="support/:id" element={<SupportDetail />} />
                 <Route path="automations" element={<CrudModule kind="automations" />} />
                 <Route path="templates" element={<CrudModule kind="templates" />} />
                 <Route path="profile" element={<Profile />} />
