@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label'
 export default function Settings() {
   const { integration, setIntegration, loading: integrationLoading } = useIntegration()
   const { t } = useLanguage()
-  const { organization, organizationId } = useOrganization()
+  const { organization, organizationId, role } = useOrganization()
   const [organizationName, setOrganizationName] = useState('')
 
   const [qrCode, setQrCode] = useState<string | null>(null)
@@ -259,6 +259,19 @@ export default function Settings() {
             ['/functions/v1/process-scheduled-messages', 'Processar mensagens agendadas'],
             ['/functions/v1/openai-agent-response', 'Executar agente OpenAI'],
           ].map(([path, label]) => { const url = `${import.meta.env.VITE_SUPABASE_URL}${path}`; return <div key={path} className="flex items-center justify-between gap-3 rounded-lg border p-3"><div className="min-w-0"><p className="text-sm font-medium">{label}</p><code className="block truncate text-xs text-muted-foreground">{url}</code></div><Button variant="ghost" size="icon" onClick={() => { navigator.clipboard.writeText(url); toast.success('Copiado') }}><Copy className="h-4 w-4" /></Button></div> })}</CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Permissões e hierarquia</CardTitle><CardDescription>As permissões são aplicadas também no banco por RLS, não apenas ocultadas na interface.</CardDescription></CardHeader>
+          <CardContent className="space-y-3">
+            {[
+              ['Super Admin', 'Controle total, permissões, exclusões, usuários, integrações e configurações globais.'],
+              ['Administrador', 'Equipes, agentes, canais, automações e configurações operacionais da organização.'],
+              ['Líder de equipe', 'Gestão da própria equipe e das conversas atribuídas ao time.'],
+              ['Agente', 'Atendimento e atividades operacionais somente dos contatos atribuídos.'],
+            ].map(([name, description]) => <div key={name} className="rounded-lg border p-3"><p className="text-sm font-semibold">{name}</p><p className="mt-1 text-xs text-muted-foreground">{description}</p></div>)}
+            <p className="text-xs text-muted-foreground">Seu nível atual: <strong>{role || 'não identificado'}</strong>.</p>
+          </CardContent>
         </Card>
       </div>
     </div>
