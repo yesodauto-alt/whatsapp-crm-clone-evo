@@ -115,3 +115,31 @@ export function Opportunities() {
   const updateStage = async (id: string, stage: string) => { await (supabase as any).from('opportunities').update({ stage }).eq('id', id); load() }
   return <div className="space-y-6"><div className="flex justify-between"><div><h1 className="flex items-center gap-2 text-2xl font-bold"><DollarSign className="h-6 w-6" />Oportunidades</h1><p className="text-sm text-muted-foreground">Propostas, produtos, valores e fechamento.</p></div><Button onClick={() => setOpen(true)}><Plus className="mr-2 h-4 w-4" />Nova oportunidade</Button></div><Card><Table><TableHeader><TableRow><TableHead>Oportunidade</TableHead><TableHead>Contato</TableHead><TableHead>Valor</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{rows.map((row) => <TableRow key={row.id}><TableCell className="font-medium">{row.title}</TableCell><TableCell>{contacts.find((c) => c.id === row.contact_id)?.push_name || '—'}</TableCell><TableCell>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((row.opportunity_items || []).reduce((sum: number, item: any) => sum + Number(item.total || 0), 0))}</TableCell><TableCell><Select value={row.stage} onValueChange={(stage) => updateStage(row.id, stage)}><SelectTrigger className="w-36"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="open">Aberta</SelectItem><SelectItem value="won">Ganha</SelectItem><SelectItem value="lost">Perdida</SelectItem></SelectContent></Select></TableCell></TableRow>)}</TableBody></Table></Card><Dialog open={open} onOpenChange={setOpen}><DialogContent><form onSubmit={save}><DialogHeader><DialogTitle>Nova oportunidade</DialogTitle></DialogHeader><div className="space-y-4 py-5"><Input required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título da proposta" /><Select value={contactId} onValueChange={setContactId}><SelectTrigger><SelectValue placeholder="Contato" /></SelectTrigger><SelectContent>{contacts.map((contact) => <SelectItem key={contact.id} value={contact.id}>{contact.push_name || contact.phone_number}</SelectItem>)}</SelectContent></Select><Input required type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Valor" /></div><DialogFooter><Button type="submit">Salvar</Button></DialogFooter></form></DialogContent></Dialog></div>
 }
+
+export function SupportDetail() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const { organizationId } = useOrganization()
+  const [ticket, setTicket] = useState<any>(null)
+  const [comments, setComments] = useState<any[]>([])
+  const [content, setContent] = useState('')
+  const load = useCallback(async () => {
+    if (!id) return
+    const [{ data: ticketRow }, { data: commentRows }] = await Promise.all([
+      (supabase as any).from('support_tickets').select('*').eq('id', id).maybeSingle(),
+      (supabase as any).from('support_ticket_comments').select('*').eq('ticket_id', id).order('created_at'),
+    ])
+    setTicket(ticketRow); setComments(commentRows || [])
+  }, [id])
+  useEffect(() => { load() }, [load])
+  const addComment = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!user || !organizationId || !id) return
+    const { error } = await (supabase as any).from('support_ticket_comments').insert({ ticket_id: id, organization_id: organizationId, created_by: user.id, content })
+    if (error) toast.error(error.message); else { setContent(''); load() }
+  }
+  const changeStatus = async (status: string) => { await (supabase as any).from('support_tickets').update({ status }).eq('id', id); load() }
+  if (!ticket) return <Loader2 className="mx-auto h-7 w-7 animate-spin" />
+  return <div className="space-y-6"><Button variant="ghost" onClick={() => navigate('/app/support')}><ArrowLeft className="mr-2 h-4 w-4" />Voltar</Button><div className="flex items-start justify-between"><div><h1 className="text-2xl font-bold">{ticket.subject}</h1><p className="mt-2 text-muted-foreground">{ticket.description}</p></div><Select value={ticket.status} onValueChange={changeStatus}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="open">Aberto</SelectItem><SelectItem value="in_progress">Em atendimento</SelectItem><SelectItem value="resolved">Resolvido</SelectItem><SelectItem value="closed">Fechado</SelectItem></SelectContent></Select></div><Card><CardHeader><CardTitle className="text-lg">Comentários</CardTitle></CardHeader><CardContent><div className="space-y-3">{comments.map((comment) => <div key={comment.id} className="rounded-lg border p-3"><p className="text-sm">{comment.content}</p><p className="mt-2 text-xs text-muted-foreground">{new Date(comment.created_at).toLocaleString('pt-BR')}</p></div>)}</div><form onSubmit={addComment} className="mt-5 flex gap-2"><Input required value={content} onChange={(e) => setContent(e.target.value)} placeholder="Adicionar comentário..." /><Button type="submit">Enviar</Button></form></CardContent></Card></div>
+}
