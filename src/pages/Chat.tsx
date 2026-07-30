@@ -211,7 +211,7 @@ export default function Chat() {
 
   return (
     <div className="max-w-5xl mx-auto h-[calc(100vh-theme(spacing.20))] sm:h-[calc(100vh-theme(spacing.24))] p-4 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-apple">
-      <div className="w-full h-full flex flex-col bg-card border border-border/60 shadow-elevation rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden">
+      <div className="w-full h-full flex flex-col bg-card border border-border/60 shadow-elevation rounded-xl sm:rounded-xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-5 bg-background/50 backdrop-blur-xl border-b border-border/40 z-10 shrink-0">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -330,7 +330,7 @@ export default function Chat() {
                       )}
                       <div
                         className={cn(
-                          'relative px-4 sm:px-5 py-2.5 sm:py-3 rounded-[1.25rem] sm:rounded-[1.5rem] flex flex-col shadow-sm text-[14px] sm:text-[15px] leading-relaxed font-medium',
+                          'relative px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-xl flex flex-col shadow-sm text-[14px] sm:text-[15px] leading-relaxed font-medium',
                           isMe
                             ? 'bg-primary text-primary-foreground rounded-br-sm'
                             : 'bg-card border border-border/60 text-foreground rounded-bl-sm',
