@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useLanguage } from '@/hooks/use-language'
 import {
   Bot,
+  BookOpen,
   Columns,
   Contact,
   FileText,
@@ -38,6 +39,8 @@ export function Sidebar() {
     { name: 'Equipes', path: '/app/teams', icon: Users, roles: ['super_admin', 'admin'] },
     { name: 'Suporte', path: '/app/support', icon: LifeBuoy },
     { name: 'IA Assistente', path: '/app/agents', icon: Bot },
+    { name: 'Base de conhecimento', path: '/app/knowledge', icon: BookOpen, roles: ['super_admin', 'admin'] },
+    { name: 'Oportunidades', path: '/app/opportunities', icon: Columns },
     { name: 'Automações', path: '/app/automations', icon: Workflow, roles: ['super_admin', 'admin'] },
     { name: 'Templates', path: '/app/templates', icon: FileText },
     { name: 'Configurações', path: '/settings', icon: SettingsIcon, roles: ['super_admin'] },
