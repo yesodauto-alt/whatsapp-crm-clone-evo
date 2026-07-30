@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useLanguage } from '@/hooks/use-language'
-import { Columns, LayoutDashboard, Package, Settings as SettingsIcon } from 'lucide-react'
+import { Bot, Columns, Contact, LayoutDashboard, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function BottomNav() {
@@ -8,15 +8,16 @@ export function BottomNav() {
   const { t } = useLanguage()
 
   const navItems = [
-    { name: t('overview_nav') || 'Overview', path: '/app', icon: LayoutDashboard },
+    { name: 'Início', path: '/app', icon: LayoutDashboard },
+    { name: 'Conversas', path: '/app/conversations', icon: MessageSquare },
+    { name: 'Contatos', path: '/app/contacts', icon: Contact },
     { name: t('pipeline_nav') || 'Pipeline', path: '/app/pipeline', icon: Columns },
-    { name: 'Produtos', path: '/app/products', icon: Package },
-    { name: t('settings_nav') || 'Settings', path: '/settings', icon: SettingsIcon },
+    { name: 'IA', path: '/app/agents', icon: Bot },
   ]
 
   return (
     <nav className="fixed bottom-0 left-0 z-40 w-full border-t border-border bg-background/90 backdrop-blur-2xl pb-safe md:hidden">
-      <div className="flex h-20 justify-around items-center px-2">
+      <div className="flex h-16 justify-around items-center px-1">
         {navItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
