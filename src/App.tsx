@@ -19,8 +19,9 @@ import Products from './pages/Products'
 import Teams from './pages/Teams'
 import NotFound from './pages/NotFound'
 import Onboarding from './pages/Onboarding'
-import { Channels, CrudModule, Leads, Priorities, Profile, Queue } from './pages/Workspace'
+import { Leads, Priorities, Profile, Queue } from './pages/Workspace'
 import { KnowledgeBase, LeadDetail, Opportunities, SupportDetail } from './pages/CRMDetails'
+import { Automations, Channels, Support, Templates } from './pages/Operations'
 
 const App = () => (
   <LanguageProvider>
@@ -52,10 +53,10 @@ const App = () => (
                 <Route path="opportunities" element={<Opportunities />} />
                 <Route path="products" element={<Products />} />
                 <Route path="teams" element={<Teams />} />
-                <Route path="support" element={<CrudModule kind="support" />} />
+                <Route path="support" element={<Support />} />
                 <Route path="support/:id" element={<SupportDetail />} />
-                <Route path="automations" element={<CrudModule kind="automations" />} />
-                <Route path="templates" element={<CrudModule kind="templates" />} />
+                <Route path="automations" element={<Automations />} />
+                <Route path="templates" element={<Templates />} />
                 <Route path="profile" element={<Profile />} />
               </Route>
 
