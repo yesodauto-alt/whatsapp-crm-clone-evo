@@ -23,6 +23,7 @@ import { Leads, Priorities, Profile, Queue } from './pages/Workspace'
 import { KnowledgeBase, LeadDetail, Opportunities, SupportDetail } from './pages/CRMDetails'
 import { Automations, Channels, Support, Templates } from './pages/Operations'
 
+// Build trigger for Skip. No runtime or functional behavior.
 const App = () => (
   <LanguageProvider>
     <BrowserRouter>
