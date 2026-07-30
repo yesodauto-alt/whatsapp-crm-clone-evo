@@ -112,10 +112,10 @@ export default function Agents() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 p-6 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-apple min-h-full bg-background">
+    <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h2 className="text-4xl font-bold tracking-tight text-foreground flex items-center gap-3">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-3">
             {t('agents_title')}
           </h2>
           <p className="text-muted-foreground mt-2 font-medium text-base">{t('agents_desc')}</p>
@@ -148,7 +148,7 @@ export default function Agents() {
           {agents.map((agent) => (
             <Card
               key={agent.id}
-              className="shadow-subtle border border-border/40 rounded-[2rem] overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-elevation"
+              className="shadow-subtle border border-border/40 rounded-xl overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-elevation"
             >
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
@@ -203,7 +203,7 @@ export default function Agents() {
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] rounded-[2rem] p-0 overflow-hidden border-border/60">
+        <DialogContent className="sm:max-w-[600px] rounded-xl p-0 overflow-hidden border-border/60">
           <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-[90vh]">
             <DialogHeader className="p-6 md:p-8 pb-4 border-b border-border/40 bg-muted/20">
               <DialogTitle className="text-2xl">
