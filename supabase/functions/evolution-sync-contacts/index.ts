@@ -2,6 +2,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 import { evolutionFetch, jsonResponse, errorResponse } from '../_shared/evolution-api.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { normalizeBrazilianPhone } from '../_shared/utils.ts'
 
 interface EvolutionContact {
   id?: string
@@ -42,7 +43,8 @@ Deno.serve(async (req: Request) => {
 
     for (const contact of contacts) {
       const remoteJid = contact.jid || contact.id || ''
-      const phoneNumber = contact.number || remoteJid.split('@')[0] || ''
+      const rawPhone = contact.number || remoteJid.split('@')[0] || ''
+      const normalizedPhone = normalizeBrazilianPhone(rawPhone)
 
       if (!remoteJid) continue
 
@@ -52,7 +54,7 @@ Deno.serve(async (req: Request) => {
           remote_jid: remoteJid,
           push_name: contact.pushName || contact.name || null,
           profile_picture_url: contact.profilePictureUrl || null,
-          phone_number: phoneNumber || null,
+          phone_number: normalizedPhone || null,
         },
         { onConflict: 'user_id,remote_jid' },
       )

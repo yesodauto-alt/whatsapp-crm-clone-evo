@@ -3,6 +3,7 @@ import { corsHeaders } from '../_shared/cors.ts'
 import { jsonResponse } from '../_shared/evolution-api.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { handleMessageUpsert } from './ai-handler.ts'
+import { normalizeBrazilianPhone } from '../_shared/utils.ts'
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -44,22 +45,32 @@ async function handleMessagesUpsert(event: any, instance: string) {
 
     let contact = await findContactByJid(userId, remoteJid)
     if (!contact) {
+      const rawPhone = remoteJid.split('@')[0] || ''
+      const normalizedPhone = normalizeBrazilianPhone(rawPhone)
+      
       const { data: newContact } = await supabase
         .from('whatsapp_contacts')
         .insert({
           user_id: userId,
           remote_jid: remoteJid,
           push_name: msg?.pushName || null,
-          phone_number: remoteJid.split('@')[0] || null,
+          phone_number: normalizedPhone || null,
           last_message_at: new Date().toISOString(),
         })
         .select()
         .single()
       contact = newContact
     } else {
+      // Also update existing contacts with normalized phone if needed
+      const rawPhone = remoteJid.split('@')[0] || ''
+      const normalizedPhone = normalizeBrazilianPhone(rawPhone)
+      
       await supabase
         .from('whatsapp_contacts')
-        .update({ last_message_at: new Date().toISOString() })
+        .update({ 
+          last_message_at: new Date().toISOString(),
+          phone_number: normalizedPhone || contact.phone_number,
+        })
         .eq('id', contact.id)
     }
 
