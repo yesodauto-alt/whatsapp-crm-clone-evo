@@ -202,7 +202,8 @@ export function Channels() {
   const { organizationId, canConfigure } = useOrganization()
   const [rows, setRows] = useState<any[]>([])
   const [open, setOpen] = useState(false)
-  const [type, setType] = useState<'email' | 'telegram'>('email')
+  const [type, setType] = useState<'email' | 'telegram' | 'whatsapp'>('email')
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [settings, setSettings] = useState<Record<string, string>>({})
   const load = useCallback(async () => {
@@ -211,24 +212,40 @@ export function Channels() {
     setRows(data || [])
   }, [organizationId])
   useEffect(() => { load() }, [load])
-  const edit = (channelType: 'email' | 'telegram') => {
-    const row = rows.find((r) => r.channel_type === channelType)
-    setType(channelType); setName(row?.name || (channelType === 'email' ? 'E-mail' : 'Telegram')); setSettings(row?.settings || {}); setOpen(true)
+
+  const whatsappChannels = rows.filter((r) => r.channel_type === 'whatsapp')
+
+  const openDialog = (channelType: 'email' | 'telegram' | 'whatsapp', row?: any) => {
+    setType(channelType)
+    setEditingId(row?.id || null)
+    setName(
+      row?.name ||
+        (channelType === 'email' ? 'E-mail' : channelType === 'telegram' ? 'Telegram' : 'Novo número WhatsApp'),
+    )
+    setSettings(row?.settings || {})
+    setOpen(true)
   }
+
   const save = async (event: FormEvent) => {
     event.preventDefault()
     if (!organizationId || !canConfigure) return
-    const row = rows.find((r) => r.channel_type === type)
+    const row = editingId ? rows.find((r) => r.id === editingId) : rows.find((r) => r.channel_type === type)
     const payload = { organization_id: organizationId, channel_type: type, name, is_active: true, settings }
     const { error } = row
       ? await (supabase as any).from('crm_channels').update(payload).eq('id', row.id)
       : await (supabase as any).from('crm_channels').insert(payload)
     if (error) toast.error(error.message); else { toast.success('Canal configurado'); setOpen(false); load() }
   }
+
+  const remove = async (id: string) => {
+    const { error } = await (supabase as any).from('crm_channels').delete().eq('id', id)
+    if (error) toast.error(error.message); else { toast.success('Canal removido'); load() }
+  }
+
   const cards = [
     { type: 'whatsapp', title: 'WhatsApp', icon: MessageSquare, active: integration?.status === 'CONNECTED', subtitle: 'Evolution API preservada' },
     { type: 'email', title: 'E-mail', icon: Mail, active: !!rows.find((r) => r.channel_type === 'email' && r.is_active), subtitle: rows.find((r) => r.channel_type === 'email')?.name || 'SMTP/IMAP' },
     { type: 'telegram', title: 'Telegram', icon: Radio, active: !!rows.find((r) => r.channel_type === 'telegram' && r.is_active), subtitle: rows.find((r) => r.channel_type === 'telegram')?.name || 'Bot Telegram' },
   ]
-  return <div className="space-y-6"><div><h1 className="text-2xl font-bold">Canais</h1><p className="text-sm text-muted-foreground">WhatsApp, e-mail e Telegram centralizados por organização.</p></div><div className="grid gap-4 md:grid-cols-3">{cards.map((channel) => <Card key={channel.type}><CardHeader><div className="flex items-center justify-between"><div className="rounded-lg bg-muted p-2"><channel.icon className="h-5 w-5" /></div><Badge variant={channel.active ? 'default' : 'outline'}>{channel.active ? 'Ativo' : 'Inativo'}</Badge></div><CardTitle className="pt-3">{channel.title}</CardTitle></CardHeader><CardContent><p className="text-sm text-muted-foreground">{channel.subtitle}</p>{channel.type !== 'whatsapp' && canConfigure && <Button className="mt-5 w-full" variant="outline" onClick={() => edit(channel.type as 'email' | 'telegram')}>Configurar</Button>}</CardContent></Card>)}</div><Dialog open={open} onOpenChange={setOpen}><DialogContent><form onSubmit={save}><DialogHeader><DialogTitle>Configurar {type === 'email' ? 'e-mail' : 'Telegram'}</DialogTitle></DialogHeader><div className="space-y-4 py-5"><div className="space-y-2"><Label>Nome do canal</Label><Input required value={name} onChange={(e) => setName(e.target.value)} /></div>{type === 'email' ? <><div className="space-y-2"><Label>Servidor SMTP</Label><Input required value={settings.smtp_host || ''} onChange={(e) => setSettings({ ...settings, smtp_host: e.target.value })} /></div><div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label>Porta</Label><Input required value={settings.smtp_port || '587'} onChange={(e) => setSettings({ ...settings, smtp_port: e.target.value })} /></div><div className="space-y-2"><Label>Usuário</Label><Input required value={settings.username || ''} onChange={(e) => setSettings({ ...settings, username: e.target.value })} /></div></div><div className="space-y-2"><Label>E-mail remetente</Label><Input type="email" required value={settings.from_email || ''} onChange={(e) => setSettings({ ...settings, from_email: e.target.value })} /></div><p className="text-xs text-muted-foreground">A senha SMTP deve ser mantida como secret no backend; nunca será salva no navegador.</p></> : <><div className="space-y-2"><Label>Nome do bot</Label><Input required value={settings.bot_name || ''} onChange={(e) => setSettings({ ...settings, bot_name: e.target.value })} /></div><div className="space-y-2"><Label>Chat ID padrão</Label><Input value={settings.chat_id || ''} onChange={(e) => setSettings({ ...settings, chat_id: e.target.value })} /></div><p className="text-xs text-muted-foreground">O token do bot deve ser configurado como secret no backend; nunca será salvo no navegador.</p></>}</div><DialogFooter><Button type="submit">Salvar canal</Button></DialogFooter></form></DialogContent></Dialog></div>
+  return <div className="space-y-6"><div><h1 className="text-2xl font-bold">Canais</h1><p className="text-sm text-muted-foreground">WhatsApp, e-mail e Telegram centralizados por organização.</p></div><div className="grid gap-4 md:grid-cols-3">{cards.map((channel) => <Card key={channel.type}><CardHeader><div className="flex items-center justify-between"><div className="rounded-lg bg-muted p-2"><channel.icon className="h-5 w-5" /></div><Badge variant={channel.active ? 'default' : 'outline'}>{channel.active ? 'Ativo' : 'Inativo'}</Badge></div><CardTitle className="pt-3">{channel.title}</CardTitle></CardHeader><CardContent><p className="text-sm text-muted-foreground">{channel.subtitle}</p>{channel.type === 'whatsapp' && whatsappChannels.length > 0 && <ul className="mt-3 space-y-2">{whatsappChannels.map((wa) => <li key={wa.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/60 px-3 py-2 text-sm"><span className="truncate font-medium">{wa.name}</span>{canConfigure && <div className="flex shrink-0 gap-1"><Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openDialog('whatsapp', wa)}><Edit2 className="h-3.5 w-3.5" /></Button><Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => remove(wa.id)}><Trash2 className="h-3.5 w-3.5" /></Button></div>}</li>)}</ul>}{canConfigure && <Button className="mt-5 w-full" variant="outline" onClick={() => openDialog(channel.type as 'email' | 'telegram' | 'whatsapp')}>{channel.type === 'whatsapp' ? 'Adicionar número' : 'Configurar'}</Button>}</CardContent></Card>)}</div><Dialog open={open} onOpenChange={setOpen}><DialogContent><form onSubmit={save}><DialogHeader><DialogTitle>Configurar {type === 'email' ? 'e-mail' : type === 'telegram' ? 'Telegram' : 'número de WhatsApp'}</DialogTitle></DialogHeader><div className="space-y-4 py-5"><div className="space-y-2"><Label>Nome do canal</Label><Input required value={name} onChange={(e) => setName(e.target.value)} placeholder={type === 'whatsapp' ? 'Ex.: (11) 99999-9999' : ''} /></div>{type === 'whatsapp' ? <div className="space-y-2"><Label>Número de WhatsApp</Label><Input required value={settings.phone_number || ''} onChange={(e) => setSettings({ ...settings, phone_number: e.target.value })} placeholder="5511999999999" /><p className="text-xs text-muted-foreground">Informe o número com DDI 55 e DDD, ex.: 5511999999999.</p></div> : type === 'email' ? <><div className="space-y-2"><Label>Servidor SMTP</Label><Input required value={settings.smtp_host || ''} onChange={(e) => setSettings({ ...settings, smtp_host: e.target.value })} /></div><div className="grid grid-cols-2 gap-3"><div className="space-y-2"><Label>Porta</Label><Input required value={settings.smtp_port || '587'} onChange={(e) => setSettings({ ...settings, smtp_port: e.target.value })} /></div><div className="space-y-2"><Label>Usuário</Label><Input required value={settings.username || ''} onChange={(e) => setSettings({ ...settings, username: e.target.value })} /></div></div><div className="space-y-2"><Label>E-mail remetente</Label><Input type="email" required value={settings.from_email || ''} onChange={(e) => setSettings({ ...settings, from_email: e.target.value })} /></div><p className="text-xs text-muted-foreground">A senha SMTP deve ser mantida como secret no backend; nunca será salva no navegador.</p></> : <><div className="space-y-2"><Label>Nome do bot</Label><Input required value={settings.bot_name || ''} onChange={(e) => setSettings({ ...settings, bot_name: e.target.value })} /></div><div className="space-y-2"><Label>Chat ID padrão</Label><Input value={settings.chat_id || ''} onChange={(e) => setSettings({ ...settings, chat_id: e.target.value })} /></div><p className="text-xs text-muted-foreground">O token do bot deve ser configurado como secret no backend; nunca será salvo no navegador.</p></>}</div><DialogFooter><Button type="submit">Salvar canal</Button></DialogFooter></form></DialogContent></Dialog></div>
 }

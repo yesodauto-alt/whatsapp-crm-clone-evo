@@ -51,11 +51,11 @@ export function Sidebar() {
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar md:flex z-20">
       <div className="border-b border-border p-4">
         <div className="flex items-center gap-3 py-1">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-sm">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold tracking-tight">Yesod CRM</p>
+            <p className="truncate text-sm font-bold tracking-tight text-brand-gradient">Yesod CRM</p>
             <p className="truncate text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               {role === 'super_admin' ? 'Super Admin' : role || organization?.name || 'CRM'}
             </p>
@@ -74,7 +74,7 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-accent text-accent-foreground'
+                  ? 'bg-brand-gradient text-white shadow-sm'
                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
               )}
             >

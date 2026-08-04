@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { LogOut, Moon, Search, Settings, ShieldCheck, Sun } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -21,19 +22,18 @@ export function Header() {
   const { integration } = useIntegration()
   const { t } = useLanguage()
   const navigate = useNavigate()
-  const [dark, setDark] = useState(false)
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    const saved = localStorage.getItem('theme') === 'dark'
-    setDark(saved)
-    document.documentElement.classList.toggle('dark', saved)
-  }, [])
+  useEffect(() => setMounted(true), [])
+
+  const dark = mounted && theme === 'dark'
 
   const toggleTheme = () => {
-    const next = !dark
-    setDark(next)
-    document.documentElement.classList.toggle('dark', next)
-    localStorage.setItem('theme', next ? 'dark' : 'light')
+    const root = document.documentElement
+    root.classList.add('theme-transition')
+    setTheme(dark ? 'light' : 'dark')
+    window.setTimeout(() => root.classList.remove('theme-transition'), 400)
   }
 
   const handleSignOut = async () => {
@@ -52,10 +52,10 @@ export function Header() {
       <div className="flex min-w-0 flex-1 items-center gap-4">
         <div className="flex items-center md:hidden">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient text-white">
               <ShieldCheck className="h-5 w-5" />
             </div>
-            <span className="font-extrabold">Yesod CRM</span>
+            <span className="font-extrabold text-brand-gradient">Yesod CRM</span>
           </div>
         </div>
         <div className="relative hidden w-full max-w-md md:block">

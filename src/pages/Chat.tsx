@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/use-auth'
 import { useAgents } from '@/hooks/use-agents'
 import { useLanguage, TranslationKey } from '@/hooks/use-language'
+import { formatPhoneBR } from '@/lib/phone'
 import { WhatsAppContact, WhatsAppMessage } from '@/lib/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -234,9 +235,8 @@ export default function Chat() {
                 {contact.push_name || t('unknown')}
               </span>
               <span className="text-[12px] sm:text-[13px] font-semibold text-muted-foreground truncate">
-                {contact.phone_number
-                  ? `+${contact.phone_number}`
-                  : contact.remote_jid.split('@')[0]}
+                {formatPhoneBR(contact.phone_number) ||
+                  formatPhoneBR(contact.remote_jid.split('@')[0])}
               </span>
             </div>
           </div>

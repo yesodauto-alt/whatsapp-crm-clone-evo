@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useContacts } from '@/hooks/use-contacts'
 import { useLanguage, TranslationKey } from '@/hooks/use-language'
+import { formatPhoneBR } from '@/lib/phone'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -144,9 +145,8 @@ export default function Contacts() {
                     {contact.push_name || t('unknown')}
                   </h3>
                   <p className="text-sm font-semibold text-muted-foreground truncate">
-                    {contact.phone_number
-                      ? `+${contact.phone_number}`
-                      : contact.remote_jid.split('@')[0]}
+                    {formatPhoneBR(contact.phone_number) ||
+                      formatPhoneBR(contact.remote_jid.split('@')[0])}
                   </p>
                 </div>
 

@@ -13,6 +13,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import { useIntegration } from '@/hooks/use-integration'
+import { fetchQrCode } from '@/lib/evolution'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
@@ -29,44 +30,24 @@ export function ConnectionCard() {
     if (!integration?.id) return
     setLoading(true)
     setError(null)
-    try {
-      const { data, error: invokeError } = await supabase.functions.invoke('evolution-get-qr', {
-        body: { integrationId: integration.id },
-      })
+    const result = await fetchQrCode(integration)
 
-      if (invokeError) {
-        throw new Error(invokeError.message || 'Unknown error calling Edge Function')
+    if (result.connected) {
+      setIntegration({ ...integration, status: 'CONNECTED' })
+      setQrCode(null)
+    } else if (result.creating) {
+      if (integration.status !== 'WAITING_QR') {
+        setIntegration({ ...integration, status: 'WAITING_QR' })
       }
-
-      if (data?.connected) {
-        setIntegration({ ...integration, status: 'CONNECTED' })
-        setQrCode(null)
-        return
+    } else if (result.error) {
+      setError(result.error)
+    } else if (result.qrCode) {
+      setQrCode(result.qrCode)
+      if (integration.status !== 'WAITING_QR') {
+        setIntegration({ ...integration, status: 'WAITING_QR' })
       }
-
-      if (data?.error === 'qr_not_ready_yet' || data?.creating) {
-        if (integration.status !== 'WAITING_QR') {
-          setIntegration({ ...integration, status: 'WAITING_QR' })
-        }
-        return
-      }
-
-      if (data?.error) {
-        throw new Error(data.error)
-      }
-
-      if (data?.base64) {
-        setQrCode(data.base64)
-        if (integration.status !== 'WAITING_QR') {
-          setIntegration({ ...integration, status: 'WAITING_QR' })
-        }
-      }
-    } catch (err: any) {
-      console.error(err)
-      setError(err.message || 'Service temporarily unavailable. Please contact support.')
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
   }, [integration, setIntegration])
 
   useEffect(() => {

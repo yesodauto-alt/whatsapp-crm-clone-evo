@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { ThemeProvider } from 'next-themes'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider } from '@/hooks/use-auth'
@@ -25,12 +26,13 @@ import { Automations, Channels, Support, Templates } from './pages/Operations'
 
 // Build trigger for Skip. No runtime or functional behavior.
 const App = () => (
-  <LanguageProvider>
-    <BrowserRouter>
-      <AuthProvider>
-        <IntegrationProvider>
-          <TooltipProvider>
-            <Sonner position="top-right" richColors />
+  <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <LanguageProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <IntegrationProvider>
+            <TooltipProvider>
+              <Sonner position="top-right" richColors />
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Index />} />
@@ -71,7 +73,8 @@ const App = () => (
         </IntegrationProvider>
       </AuthProvider>
     </BrowserRouter>
-  </LanguageProvider>
+    </LanguageProvider>
+  </ThemeProvider>
 )
 
 export default App

@@ -3,6 +3,7 @@ import { useIntegration } from '@/hooks/use-integration'
 import { useLanguage } from '@/hooks/use-language'
 import { useOrganization } from '@/hooks/use-organization'
 import { supabase } from '@/lib/supabase/client'
+import { fetchQrCode } from '@/lib/evolution'
 import { cn } from '@/lib/utils'
 import {
   Card,
@@ -47,37 +48,28 @@ export default function Settings() {
 
     let retries = 0
     const fetchQr = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('evolution-get-qr', {
-          body: { integrationId: integration.id },
-        })
+      const result = await fetchQrCode(integration)
 
-        if (error) throw error
-
-        if (data?.base64) {
-          setQrCode(data.base64)
-          if (integration.status !== 'WAITING_QR') {
-            setIntegration((prev: any) => (prev ? { ...prev, status: 'WAITING_QR' } : null))
-          }
-          setIsConnecting(false)
-        } else if (data?.connected) {
-          if (integration.status !== 'CONNECTED') {
-            setIntegration((prev: any) => (prev ? { ...prev, status: 'CONNECTED' } : null))
-          }
-          toast.success(t('already_connected'))
-          setIsConnecting(false)
-        } else if ((data?.error === 'qr_not_ready_yet' || data?.creating) && retries < 5) {
-          if (integration.status !== 'WAITING_QR') {
-            setIntegration((prev: any) => (prev ? { ...prev, status: 'WAITING_QR' } : null))
-          }
-          retries++
-          setTimeout(fetchQr, 2000)
-        } else {
-          toast.error(data?.error || t('failed_init'))
-          setIsConnecting(false)
+      if (result.qrCode) {
+        setQrCode(result.qrCode)
+        if (integration.status !== 'WAITING_QR') {
+          setIntegration((prev: any) => (prev ? { ...prev, status: 'WAITING_QR' } : null))
         }
-      } catch (e: any) {
-        toast.error(e.message || t('error_connect'))
+        setIsConnecting(false)
+      } else if (result.connected) {
+        if (integration.status !== 'CONNECTED') {
+          setIntegration((prev: any) => (prev ? { ...prev, status: 'CONNECTED' } : null))
+        }
+        toast.success(t('already_connected'))
+        setIsConnecting(false)
+      } else if (result.creating && retries < 5) {
+        if (integration.status !== 'WAITING_QR') {
+          setIntegration((prev: any) => (prev ? { ...prev, status: 'WAITING_QR' } : null))
+        }
+        retries++
+        setTimeout(fetchQr, 2000)
+      } else {
+        toast.error(result.error || t('failed_init'))
         setIsConnecting(false)
       }
     }
@@ -90,7 +82,7 @@ export default function Settings() {
     setIsConnecting(true)
     try {
       const { error } = await supabase.functions.invoke('evolution-disconnect', {
-        body: { integrationId: integration.id },
+        body: { instanceName: integration.instance_name, userId: integration.user_id },
       })
       if (error) throw error
       toast.success(t('disconnected_success'))

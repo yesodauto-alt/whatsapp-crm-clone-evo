@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useIntegration } from '@/hooks/use-integration'
 import { useLanguage } from '@/hooks/use-language'
+import { fetchQrCode } from '@/lib/evolution'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Loader2, Smartphone, BrainCircuit, CheckCircle2 } from 'lucide-react'
@@ -33,22 +34,16 @@ export default function Onboarding() {
     if (step === 1 && integration?.status !== 'CONNECTED') {
       const fetchQR = async () => {
         if (!integration?.id) return
-        try {
-          const { data } = await supabase.functions.invoke('evolution-get-qr', {
-            body: { integrationId: integration.id },
-          })
-          if (data?.base64) {
-            setQrCode(data.base64)
-            if (integration.status !== 'WAITING_QR') {
-              setIntegration((prev: any) => (prev ? { ...prev, status: 'WAITING_QR' } : null))
-            }
+        const result = await fetchQrCode(integration)
+        if (result.qrCode) {
+          setQrCode(result.qrCode)
+          if (integration.status !== 'WAITING_QR') {
+            setIntegration((prev: any) => (prev ? { ...prev, status: 'WAITING_QR' } : null))
           }
-          if (data?.connected) {
-            setIntegration((prev: any) => (prev ? { ...prev, status: 'CONNECTED' } : null))
-            setStep(2)
-          }
-        } catch {
-          // Silent catch to prevent console spam
+        }
+        if (result.connected) {
+          setIntegration((prev: any) => (prev ? { ...prev, status: 'CONNECTED' } : null))
+          setStep(2)
         }
       }
       fetchQR()
@@ -67,33 +62,6 @@ export default function Onboarding() {
       handleSync()
     }
   }, [step])
-
-  // Improved polling to prevent indefinite loops
-  const pollJob = async (jobId: string, maxSeconds: number = 10) => {
-    return new Promise<void>((resolve) => {
-      let attempts = 0
-      const maxAttempts = Math.ceil(maxSeconds / 2)
-
-      const interval = setInterval(async () => {
-        attempts++
-        const { data, error } = await supabase
-          .from('import_jobs')
-          .select('status')
-          .eq('id', jobId)
-          .single()
-
-        if (
-          error ||
-          data?.status === 'failed' ||
-          data?.status === 'completed' ||
-          attempts >= maxAttempts
-        ) {
-          clearInterval(interval)
-          resolve() // Resolve rather than reject to avoid blocking the user flow
-        }
-      }, 2000)
-    })
-  }
 
   const handleSync = async () => {
     const currentIntegrationId = integration?.id
@@ -130,19 +98,25 @@ export default function Onboarding() {
     try {
       setSyncStatus(t('downloading_contacts'))
       setProgress(20)
-      const { data: cData } = await supabase.functions.invoke('evolution-sync-contacts')
-      if (cData?.job_id) await pollJob(cData.job_id, 10)
+      const { data: cData, error: cErr } = await supabase.functions.invoke(
+        'evolution-sync-contacts',
+        { body: { instanceName: integration?.instance_name, userId: integration?.user_id } },
+      )
+      if (cErr) throw new Error(cErr.message)
+      if (cData?.error) throw new Error(cData.error)
 
       setSyncStatus(t('downloading_messages'))
       setProgress(50)
-      const { data: mData } = await supabase.functions.invoke('evolution-sync-messages')
-      if (mData?.job_id) await pollJob(mData.job_id, 10)
+      // evolution-sync-messages é por contato (exige remoteJid/contactId);
+      // mensagens novas chegam em tempo real via webhook, então não é
+      // necessário sincronizar em lote no onboarding.
 
       setSyncStatus(t('ai_classifying'))
       setProgress(75)
 
-      const { data: aData } = await supabase.functions.invoke('ai-classify-contacts')
-      if (aData?.job_id) await pollJob(aData.job_id, 10)
+      const { data: aData, error: aErr } = await supabase.functions.invoke('ai-classify-contacts')
+      if (aErr) throw new Error(aErr.message)
+      if (aData?.error) throw new Error(aData.error)
 
       setProgress(100)
       setSyncStatus(t('setup_complete') || 'Integração concluída! Redirecionando para o CRM...')

@@ -28,42 +28,42 @@ interface Product {
 const mockProducts: Product[] = [
   {
     id: '1',
-    name: 'Auto Insurance',
-    description: 'Comprehensive vehicle insurance coverage tailored to your needs.',
+    name: 'Seguro Automotivo',
+    description: 'Cobertura completa de seguro veicular, adaptada às suas necessidades.',
     price: 299,
-    category: 'Insurance',
+    category: 'Seguro',
     is_active: true,
   },
   {
     id: '2',
-    name: 'Vehicle Inspection',
-    description: 'Complete vehicle safety and mechanical inspection service.',
+    name: 'Inspeção Veicular',
+    description: 'Serviço completo de inspeção de segurança e mecânica do veículo.',
     price: 150,
-    category: 'Service',
+    category: 'Serviço',
     is_active: true,
   },
   {
     id: '3',
-    name: 'Financing Consultation',
-    description: 'Expert consultation on vehicle financing options and rates.',
+    name: 'Consultoria de Financiamento',
+    description: 'Consultoria especializada em opções e taxas de financiamento de veículos.',
     price: 0,
-    category: 'Consultation',
+    category: 'Consultoria',
     is_active: true,
   },
   {
     id: '4',
-    name: 'Extended Warranty',
-    description: 'Extended warranty coverage for new and used vehicles.',
+    name: 'Garantia Estendida',
+    description: 'Cobertura de garantia estendida para veículos novos e usados.',
     price: 499,
-    category: 'Warranty',
+    category: 'Garantia',
     is_active: false,
   },
   {
     id: '5',
-    name: 'Fleet Management',
-    description: 'Complete fleet management solution for businesses.',
+    name: 'Gestão de Frotas',
+    description: 'Solução completa de gestão de frotas para empresas.',
     price: 1200,
-    category: 'Enterprise',
+    category: 'Empresarial',
     is_active: true,
   },
 ]
@@ -228,7 +228,7 @@ export default function Products() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Auto Insurance"
+                  placeholder="Ex.: Seguro Automotivo"
                   className="rounded-xl h-12"
                 />
               </div>
@@ -240,7 +240,7 @@ export default function Products() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Comprehensive coverage..."
+                  placeholder="Descreva a cobertura..."
                   className="rounded-xl min-h-[100px] resize-none"
                 />
               </div>
@@ -267,7 +267,7 @@ export default function Products() {
                     id="category"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="Insurance"
+                    placeholder="Ex.: Seguro"
                     className="rounded-xl h-12"
                   />
                 </div>
