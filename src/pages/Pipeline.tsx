@@ -15,6 +15,8 @@ import { formatDistanceToNow } from 'date-fns'
 import { ptBR, enUS } from 'date-fns/locale'
 import { useLanguage } from '@/hooks/use-language'
 import { getBadgeColor } from './Dashboard'
+import { formatPhoneBR } from '@/lib/phone'
+import { classificationLabel } from '@/lib/classification'
 import { Clock, MessageSquare, AlertCircle, CheckCircle2, XCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
@@ -156,14 +158,15 @@ export default function Pipeline() {
                           {c.push_name || 'Desconhecido'}
                         </h4>
                         <p className="text-[13px] font-medium text-muted-foreground truncate">
-                          {c.phone_number ? `+${c.phone_number}` : c.remote_jid.split('@')[0]}
+                          {formatPhoneBR(c.phone_number) ||
+                            formatPhoneBR(c.remote_jid.split('@')[0])}
                         </p>
                         {c.classification && (
                           <Badge
                             variant="outline"
                             className={`text-[10px] px-2 py-0.5 mt-1.5 ${getBadgeColor(c.classification)}`}
                           >
-                            {c.classification}
+                            {classificationLabel[c.classification] || c.classification}
                           </Badge>
                         )}
                       </div>

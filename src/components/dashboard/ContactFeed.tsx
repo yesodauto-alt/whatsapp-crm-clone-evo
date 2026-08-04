@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useContacts } from '@/hooks/use-contacts'
+import { formatPhoneBR } from '@/lib/phone'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -69,7 +70,8 @@ export function ContactFeed() {
                       {contact.push_name || 'Unknown Contact'}
                     </p>
                     <p className="text-[12px] font-medium text-muted-foreground truncate max-w-[150px] sm:max-w-[180px]">
-                      {contact.remote_jid.split('@')[0]}
+                      {formatPhoneBR(contact.phone_number) ||
+                        formatPhoneBR(contact.remote_jid.split('@')[0])}
                     </p>
                   </div>
                 </div>

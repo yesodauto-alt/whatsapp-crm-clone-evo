@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useContacts } from '@/hooks/use-contacts'
 import { useLanguage, TranslationKey } from '@/hooks/use-language'
+import { classificationLabel } from '@/lib/classification'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -443,11 +444,8 @@ export default function Dashboard() {
                             variant="outline"
                             className={`text-[10px] px-2 py-0.5 font-bold shadow-sm rounded-md ${getBadgeColor(contact.classification)}`}
                           >
-                            {t(
-                              contact.classification
-                                .toLowerCase()
-                                .replace(/ /g, '_') as TranslationKey,
-                            ) || contact.classification}
+                            {classificationLabel[contact.classification] ||
+                              contact.classification}
                           </Badge>
                         )}
                       </div>

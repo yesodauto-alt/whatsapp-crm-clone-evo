@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useContacts } from '@/hooks/use-contacts'
 import { useLanguage, TranslationKey } from '@/hooks/use-language'
 import { formatPhoneBR } from '@/lib/phone'
+import { classificationLabel } from '@/lib/classification'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -160,11 +161,7 @@ export default function Contacts() {
                       )}
                     >
                       {contact.classification
-                        ? t(
-                            contact.classification
-                              .toLowerCase()
-                              .replace(/ /g, '_') as TranslationKey,
-                          )
+                        ? classificationLabel[contact.classification] || contact.classification
                         : t('unclassified')}
                     </Badge>
 
