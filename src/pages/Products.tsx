@@ -114,40 +114,40 @@ export default function Products() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 p-6 md:p-12 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-apple min-h-full bg-background">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="max-w-7xl mx-auto space-y-6 p-4 md:p-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-apple min-h-full bg-background">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-4xl font-bold tracking-tight text-foreground">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
             {t('products_title') || 'Products & Services'}
           </h2>
-          <p className="text-muted-foreground mt-2 font-medium text-base">
+          <p className="text-muted-foreground mt-1 font-medium text-sm">
             {t('products_desc') || 'Manage your products and service offerings'}
           </p>
         </div>
         <Button
           onClick={() => handleOpenDialog()}
-          className="rounded-full shadow-subtle px-6 h-12 font-semibold"
+          className="rounded-full shadow-subtle px-5 h-10 font-semibold"
         >
-          <Plus className="mr-2 h-5 w-5" />
+          <Plus className="mr-2 h-4 w-4" />
           {t('add_product') || 'Add Product'}
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {products.map((product) => (
           <Card
             key={product.id}
-            className="shadow-subtle border border-border/40 rounded-[2rem] overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-elevation"
+            className="shadow-subtle border border-border/40 rounded-xl overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-elevation"
           >
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted p-3 rounded-full">
-                    <Package className="h-5 w-5 text-foreground" />
+                <div className="flex items-center gap-2.5">
+                  <div className="bg-muted p-2.5 rounded-full">
+                    <Package className="h-4 w-4 text-foreground" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg tracking-tight">{product.name}</CardTitle>
-                    <CardDescription className="text-xs font-semibold mt-0.5 uppercase tracking-wider">
+                    <CardTitle className="text-base tracking-tight">{product.name}</CardTitle>
+                    <CardDescription className="text-[11px] font-semibold mt-0.5 uppercase tracking-wider">
                       {product.category}
                     </CardDescription>
                   </div>
@@ -157,16 +157,16 @@ export default function Products() {
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="flex-1 pb-6">
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+            <CardContent className="flex-1 pb-4">
+              <p className="text-[13px] text-muted-foreground leading-relaxed mb-3 line-clamp-2">
                 {product.description}
               </p>
-              <div className="flex items-center gap-2 text-2xl font-bold text-foreground">
-                <DollarSign className="h-5 w-5 text-muted-foreground" />
+              <div className="flex items-center gap-1.5 text-lg font-bold text-foreground">
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
                 {product.price === 0 ? t('free') || 'Free' : product.price.toFixed(2)}
               </div>
             </CardContent>
-            <div className="border-t border-border/40 bg-muted/10 p-4 flex justify-end gap-2 shrink-0">
+            <div className="border-t border-border/40 bg-muted/10 p-3 flex justify-end gap-2 shrink-0">
               <Button
                 variant="ghost"
                 size="sm"

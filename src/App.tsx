@@ -18,6 +18,7 @@ import Chat from './pages/Chat'
 import Agents from './pages/Agents'
 import Products from './pages/Products'
 import Teams from './pages/Teams'
+import Reports from './pages/Reports'
 import NotFound from './pages/NotFound'
 import Onboarding from './pages/Onboarding'
 import { Leads, Priorities, Profile, Queue } from './pages/Workspace'
@@ -55,6 +56,7 @@ const App = () => (
                 <Route path="knowledge" element={<KnowledgeBase />} />
                 <Route path="opportunities" element={<Opportunities />} />
                 <Route path="products" element={<Products />} />
+                <Route path="reports" element={<Reports />} />
                 <Route path="teams" element={<Teams />} />
                 <Route path="support" element={<Support />} />
                 <Route path="support/:id" element={<SupportDetail />} />

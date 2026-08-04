@@ -36,6 +36,7 @@ export function Sidebar() {
     { name: 'Canais', path: '/app/channels', icon: Radio, roles: ['super_admin', 'admin'] },
     { name: t('pipeline_nav') || 'Pipeline', path: '/app/pipeline', icon: Columns },
     { name: 'Produtos', path: '/app/products', icon: Package, roles: ['super_admin', 'admin'] },
+    { name: 'Relatórios', path: '/app/reports', icon: FileText, roles: ['super_admin', 'admin'] },
     { name: 'Equipes', path: '/app/teams', icon: Users, roles: ['super_admin', 'admin'] },
     { name: 'Suporte', path: '/app/support', icon: LifeBuoy },
     { name: 'IA Assistente', path: '/app/agents', icon: Bot },

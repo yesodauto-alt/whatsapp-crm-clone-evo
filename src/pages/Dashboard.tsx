@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useContacts } from '@/hooks/use-contacts'
 import { useLanguage, TranslationKey } from '@/hooks/use-language'
 import { classificationLabel } from '@/lib/classification'
+import { ChannelsOverview } from '@/components/dashboard/ChannelsOverview'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -278,6 +279,8 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <ChannelsOverview />
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
