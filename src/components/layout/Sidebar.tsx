@@ -52,7 +52,7 @@ export function Sidebar() {
       <div className="border-b border-border p-4">
         <div className="flex items-center gap-3 py-1">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-sm">
-            <ShieldCheck className="h-5 w-5" />
+            <ShieldCheck className="h-4 w-4" />
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-bold tracking-tight text-brand-gradient">Yesod CRM</p>
@@ -78,7 +78,7 @@ export function Sidebar() {
                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-4 w-4" />
               {item.name}
             </Link>
           )

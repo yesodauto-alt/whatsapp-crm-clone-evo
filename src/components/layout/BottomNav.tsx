@@ -33,7 +33,7 @@ export function BottomNav() {
             >
               <item.icon
                 className={cn(
-                  'h-6 w-6 mb-0.5 transition-colors duration-300',
+                  'h-5 w-5 mb-0.5 transition-colors duration-300',
                   isActive ? 'text-foreground' : 'text-muted-foreground',
                 )}
               />
