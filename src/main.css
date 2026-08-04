@@ -43,10 +43,10 @@
     --chart-4: 214 32% 91%;
     --chart-5: 210 40% 98%;
 
-    --class-hot: 222 47% 11%;
-    --class-warm: 226 71% 40%;
-    --class-lukewarm: 213 94% 68%;
-    --class-cold: 214 100% 91%;
+    --class-hot: 0 72% 50%;
+    --class-warm: 25 95% 50%;
+    --class-lukewarm: 45 95% 50%;
+    --class-cold: 213 94% 50%;
     --class-dnc: 215 16% 47%;
   }
 
@@ -87,9 +87,9 @@
     --chart-5: 160 84% 39%;
 
     --class-hot: 0 72% 60%;
-    --class-warm: 25 95% 53%;
-    --class-lukewarm: 213 94% 68%;
-    --class-cold: 214 100% 80%;
+    --class-warm: 25 95% 55%;
+    --class-lukewarm: 45 95% 55%;
+    --class-cold: 213 94% 65%;
     --class-dnc: 215 20% 60%;
   }
 

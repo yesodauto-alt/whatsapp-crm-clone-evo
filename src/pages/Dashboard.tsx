@@ -35,13 +35,13 @@ import { useFinancialDashboard } from '@/hooks/use-financial-dashboard'
 export const getBadgeColor = (classification: string | null) => {
   switch (classification) {
     case 'Hot':
-      return 'bg-class-hot text-primary-foreground border-class-hot'
+      return 'bg-class-hot text-white border-class-hot'
     case 'Warm':
       return 'bg-class-warm text-white border-class-warm'
     case 'Lukewarm':
-      return 'bg-class-lukewarm text-white border-class-lukewarm'
+      return 'bg-class-lukewarm text-foreground border-class-lukewarm'
     case 'Cold':
-      return 'bg-class-cold text-class-hot border-class-cold'
+      return 'bg-class-cold text-white border-class-cold'
     case 'Do Not Contact':
       return 'bg-transparent text-class-dnc border-class-dnc line-through'
     default:
