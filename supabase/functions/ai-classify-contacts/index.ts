@@ -11,9 +11,9 @@ Deno.serve(async (req: Request) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
 
-    if (!geminiApiKey) throw new Error('System Gemini API key missing')
+    if (!openaiApiKey) throw new Error('System OpenAI API key missing')
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
@@ -212,35 +212,36 @@ Return ONLY a valid JSON object with no additional text:
 `
 
             try {
-              // Ensure we use a stable and valid endpoint to avoid 404s
-              const aiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${geminiApiKey}`
-              console.log(
-                `[AI Classifier] Calling Gemini API at v1beta/models/gemini-3.1-flash-lite-preview...`,
-              )
+              // Usa a API da OpenAI (chat completions) com resposta em JSON
+              const aiUrl = 'https://api.openai.com/v1/chat/completions'
+              console.log('[AI Classifier] Calling OpenAI API...')
               const aiRes = await fetch(aiUrl, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
+                  Authorization: `Bearer ${openaiApiKey}`,
                 },
                 body: JSON.stringify({
-                  contents: [
+                  model: 'gpt-4o-mini',
+                  messages: [
+                    {
+                      role: 'system',
+                      content:
+                        'You are a JSON-only assistant. Return only valid JSON matching the requested schema.',
+                    },
                     {
                       role: 'user',
-                      parts: [
-                        { text: `${prompt}\n\n## CONVERSATION TO ANALYZE:\n${conversation}` },
-                      ],
+                      content: `${prompt}\n\n## CONVERSATION TO ANALYZE:\n${conversation}`,
                     },
                   ],
-                  generationConfig: {
-                    responseMimeType: 'application/json',
-                    temperature: 0.2,
-                  },
+                  response_format: { type: 'json_object' },
+                  temperature: 0.2,
                 }),
               })
 
               if (aiRes.ok) {
                 const aiData = await aiRes.json()
-                const textResponse = aiData.candidates?.[0]?.content?.parts?.[0]?.text
+                const textResponse = aiData.choices?.[0]?.message?.content
 
                 if (textResponse) {
                   const result = JSON.parse(textResponse)
@@ -255,7 +256,7 @@ Return ONLY a valid JSON object with no additional text:
                 }
               } else {
                 console.error(
-                  `Gemini API Error for contact ${contact.id}: Status ${aiRes.status} -`,
+                  `OpenAI API Error for contact ${contact.id}: Status ${aiRes.status} -`,
                   await aiRes.text(),
                 )
               }
